@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Testlab3/Testlab3Booking.csproj" />
+  <Project Path="TestLab3Petstore/TestLab3Petstore.csproj" Id="5cd8ac73-b73e-4072-a7cb-72178079bb9f" />
+</Solution>
