@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Text.Json; // Потрібно для парсингу JSON відповіді
+using System.Text.Json; 
 using NUnit.Framework;
 using RestSharp;
-using RestSharp.Authenticators; // Потрібно для базової авторизації
+using RestSharp.Authenticators; 
 using TechTalk.SpecFlow;
 
 namespace Testlab3.Steps
@@ -14,13 +14,11 @@ namespace Testlab3.Steps
         private RestRequest _request;
         private RestResponse _response;
 
-        // Змінна для зберігання ID поточного бронювання між кроками
         private string _currentBookingId;
 
         [Given(@"I set the base URL to ""(.*)""")]
         public void GivenISetTheBaseUrlTo(string baseUrl)
         {
-            // Налаштовуємо клієнт та ОДРАЗУ додаємо базову авторизацію для всіх майбутніх запитів
             var options = new RestClientOptions(baseUrl)
             {
                 Authenticator = new HttpBasicAuthenticator("admin", "password123")
@@ -48,27 +46,22 @@ namespace Testlab3.Steps
 
             _response = _client.Execute(_request);
 
-            // ЗБЕРІГАЄМО ID БРОНЮВАННЯ ДЛЯ НАСТУПНИХ КРОКІВ
             if ((int)_response.StatusCode == 200)
             {
-                // Парсимо JSON відповідь: {"bookingid": 123, "booking": {...}}
                 var jsonDocument = JsonDocument.Parse(_response.Content);
                 _currentBookingId = jsonDocument.RootElement.GetProperty("bookingid").ToString();
             }
         }
 
-        // НОВИЙ КРОК ДЛЯ ДИНАМІЧНОГО PUT
         [When(@"I send a PUT request to the created booking with the updated details:")]
         public void WhenISendAPUTRequestToTheCreatedBookingWithTheUpdatedDetails(TechTalk.SpecFlow.Table table)
         {
-            // Формуємо endpoint, використовуючи збережений ID (наприклад, "/booking/123")
             string endpoint = $"/booking/{_currentBookingId}";
 
             _request = new RestRequest(endpoint, Method.Put);
             _request.AddHeader("Content-Type", "application/json");
             _request.AddHeader("Accept", "application/json");
 
-            // Нам більше не треба вручну додавати Authorization, бо ми додали Authenticator у клієнт!
 
             var body = CreateBookingBody(table.Rows[0]);
             _request.AddJsonBody(body);
@@ -76,7 +69,6 @@ namespace Testlab3.Steps
             _response = _client.Execute(_request);
         }
 
-        // НОВИЙ КРОК ДЛЯ ДИНАМІЧНОГО DELETE
         [When(@"I send a DELETE request to the created booking")]
         public void WhenISendADELETERequestToTheCreatedBooking()
         {
@@ -95,7 +87,6 @@ namespace Testlab3.Steps
                 $"Expected status {expectedStatusCode} but got {actualStatusCode}. Content: {_response.Content}");
         }
 
-        // --- ДОПОМІЖНИЙ МЕТОД ---
         private object CreateBookingBody(TableRow row)
         {
             return new
